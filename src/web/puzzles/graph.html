@@ -6,23 +6,12 @@
 <title>CyberChef graph</title>
 <style>
 html, body { margin: 0; height: 100%; overflow: hidden; background: #222; color: #ddd; font: 13px system-ui, sans-serif; }
-#bar { display: flex; gap: 6px; align-items: center; padding: 6px 10px; background: #2b2b2b; border-bottom: 1px solid #444; flex-wrap: wrap; }
-#bar button { padding: 4px 10px; background: #3a3a3a; color: #eee; border: 1px solid #555; border-radius: 4px; cursor: pointer; }
-#bar a { color: #8bd; }
-#bar span { color: #999; }
+#bar a { color: #8bd; margin-left: 8px; }
 canvas { display: block; }
 </style>
 </head>
 <body>
-<div id="bar">
-  <strong>CyberChef graph</strong>
-  <button id="run">Run</button>
-  <button id="share">Copy link</button>
-  <button id="example">PK1-8 example</button>
-  <button id="clear">Clear</button>
-  <span>Double-click the canvas to add any CyberChef operation; drag an output onto an input or a key port to wire it.</span>
-  <a href="index.html">CyberChef</a> <a href="book.html">Recipe book</a>
-</div>
+<div id="bar"><strong style="padding: 4px 8px; display: inline-block;">CyberChef graph</strong><a href="index.html">CyberChef</a><a href="book.html">Recipe book</a></div>
 <canvas id="graph"></canvas>
 </body>
 </html>

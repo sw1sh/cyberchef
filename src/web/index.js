@@ -19,6 +19,8 @@ import * as CanvasComponents from "../core/lib/CanvasComponents.mjs";
 import App from "./App.mjs";
 import Categories from "../core/config/Categories.json" with { type: "json" };
 import OperationConfig from "../core/config/OperationConfig.json" with { type: "json" };
+// WolframInstitute/Puzzles: the Graph mode (Recipe / Graph switch), a DAG editor beside the linear recipe
+import "./puzzles/graphMode.mjs";
 
 
 /**
@@ -67,4 +69,3 @@ window.compileMessage = COMPILE_MSG;
 window.CanvasComponents = CanvasComponents;
 
 document.addEventListener("DOMContentLoaded", main, false);
-
