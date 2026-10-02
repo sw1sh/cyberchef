@@ -76,11 +76,19 @@
  */
 
 /**
- * The recipe GRAPH: CyberChef operations as nodes on a canvas (LiteGraph, the node editor ComfyUI grew from), wired
- * output to input.  Every operation has a text input and a text output, a widget for each argument, and - for every
- * string argument - an input port that, when wired, takes the argument from another node's output: so one panel's
- * plaintext can be the next one's key.  Run bakes the graph in dependency order, one operation at a time, on
- * CyberChef's own worker; the address bar holds the whole graph (#graph=, lz-string compressed).
+ * The recipe GRAPH editor: CyberChef operations as nodes on a canvas (LiteGraph, the node editor ComfyUI grew from),
+ * wired output to input.  Every operation has a text input and a text output, a widget for each argument, and - for
+ * every string argument - an input port that, when wired, takes the argument from another node's output: so one
+ * panel's plaintext can be the next one's key.  The graph is live: any edit re-bakes it, in dependency order, one
+ * operation at a time, on CyberChef's own worker.  Used by the standalone graph.html and by the Graph mode inside the
+ * main CyberChef app; a graph is plain JSON (LiteGraph's own serialisation), kept in links as #graph= (lz-string).
+ *
+ * @license Apache-2.0
+ */
+
+/**
+ * The standalone graph page: the graph editor full-window with its toolbar; the address bar holds the graph
+ * (#graph=, lz-string).  The same editor runs inside the main CyberChef as its Graph mode (graphMode.mjs).
  *
  * @license Apache-2.0
  */

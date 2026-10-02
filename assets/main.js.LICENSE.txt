@@ -118,6 +118,13 @@
  */
 
 /**
+ * A small client for CyberChef's own ChefWorker, so the graph editor and the recipe book bake with exactly the engine
+ * the main app uses (operation modules loaded on demand from ./modules/).
+ *
+ * @license Apache-2.0
+ */
+
+/**
  * Base64 functions.
  *
  * @author n1474335 [n1474335@gmail.com]
@@ -191,6 +198,17 @@
  */
 
 /**
+ * Graph mode inside the main CyberChef: a Recipe / Graph switch in the banner.  In Graph mode the recipe, input and
+ * output panes give way to the graph editor (the operations list stays, and double-clicking an operation adds it as a
+ * node); in Recipe mode everything is as CyberChef has it.  The two hold DIFFERENT states - a DAG is not a linear
+ * recipe - and switching never converts one into the other: the linear recipe and input keep their usual URL and
+ * storage, the graph is kept in the browser (localStorage "puzzles.graph") and in its own link (#graph=).  A link with
+ * #graph= opens in Graph mode; otherwise the last mode used is restored.
+ *
+ * @license Apache-2.0
+ */
+
+/**
  * Stream class for parsing binary protocols.
  *
  * @author n1474335 [n1474335@gmail.com]
@@ -205,6 +223,17 @@
  *
  * @author n1474335 [n1474335@gmail.com]
  * @copyright Crown Copyright 2017
+ * @license Apache-2.0
+ */
+
+/**
+ * The recipe GRAPH editor: CyberChef operations as nodes on a canvas (LiteGraph, the node editor ComfyUI grew from),
+ * wired output to input.  Every operation has a text input and a text output, a widget for each argument, and - for
+ * every string argument - an input port that, when wired, takes the argument from another node's output: so one
+ * panel's plaintext can be the next one's key.  The graph is live: any edit re-bakes it, in dependency order, one
+ * operation at a time, on CyberChef's own worker.  Used by the standalone graph.html and by the Graph mode inside the
+ * main CyberChef app; a graph is plain JSON (LiteGraph's own serialisation), kept in links as #graph= (lz-string).
+ *
  * @license Apache-2.0
  */
 
