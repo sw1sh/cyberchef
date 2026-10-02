@@ -345,19 +345,42 @@ export function createGraphEditor(canvasEl, opts = {}) {
     function addOperation(name) {
         if (!OperationConfig[name]) return null;
         const c = canvas.canvas;
-        const pos = canvas.convertOffsetToCanvas([c.width / 2 - 120, c.height / 2 - 40]);
+        // LiteGraph 0.7's names run the other way: convertCanvasToOffset maps a screen point to graph coordinates
+        const mid = canvas.convertCanvasToOffset([c.width / 2, c.height / 2]);
+        const pos = [mid[0] - 120, mid[1] - 40];
         const n = addOp({op: name, args: (OperationConfig[name].args || []).map(defaultArg)}, pos[0], pos[1]);
         canvas.selectNode(n);
         return n;
     }
 
-    /** load a graph (its JSON), or the PK example when given none */
+    /** scale and pan so every node is in view (at most 1:1) */
+    function fit() {
+        const nodes = graph._nodes;
+        const c = canvas.canvas;
+        if (!nodes.length || !c.width || !c.height) return;
+        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+        nodes.forEach(n => {
+            x0 = Math.min(x0, n.pos[0]);
+            y0 = Math.min(y0, n.pos[1] - 30);
+            x1 = Math.max(x1, n.pos[0] + n.size[0]);
+            y1 = Math.max(y1, n.pos[1] + n.size[1] + 40);
+        });
+        const pad = 40, w = x1 - x0 + 2 * pad, h = y1 - y0 + 2 * pad;
+        const scale = Math.min(1, c.width / w, c.height / h);
+        canvas.ds.scale = scale;
+        canvas.ds.offset[0] = (c.width / scale - (x1 - x0)) / 2 - x0;
+        canvas.ds.offset[1] = (c.height / scale - (y1 - y0)) / 2 - y0;
+        canvas.setDirty(true, true);
+    }
+
+    /** load a graph (its JSON), or the PK example when given none; fitted to the view */
     function load(json) {
         if (json) {
             loading = true;
             graph.configure(typeof json === "string" ? JSON.parse(json) : json);
             loading = false;
         } else pkExample();
+        fit();
         return run();
     }
 
@@ -376,6 +399,7 @@ export function createGraphEditor(canvasEl, opts = {}) {
         load: load,
         clear: clear,
         example: () => load(null),
+        fit: fit,
         addOperation: addOperation,
         serialize: () => graph.serialize(),
         resize: (w, h) => {

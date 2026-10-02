@@ -35,7 +35,7 @@ whenAppReady(app => {
     // the pane: over the recipe and IO panes, from just right of the operations list (its gutter stays draggable)
     const pane = document.createElement("div");
     pane.id = "graph-pane";
-    pane.style.cssText = "position:absolute; top:0; bottom:0; right:0; display:none; flex-direction:column; background:#222; z-index:5;";
+    pane.style.cssText = "position:absolute; top:0; bottom:0; right:0; display:none; flex-direction:column; background:#222; z-index:1000;";
     const barHost = document.createElement("div");
     const canvasEl = document.createElement("canvas");
     canvasEl.id = "graph-canvas";
@@ -56,7 +56,7 @@ whenAppReady(app => {
             if (mode === "graph") window.history.replaceState({}, document.title, "#graph=" + graphToLink(json));
         }
     });
-    createGraphToolbar(barHost, editor, linkFor);
+    createGraphToolbar(barHost, editor, linkFor, {toRecipe: () => setMode("linear")});
 
     /** the pane follows the operations list's width and the window */
     const layout = () => {
@@ -96,9 +96,16 @@ whenAppReady(app => {
             b.style.color = on ? "var(--primary-font-colour, #fff)" : "inherit";
             b.style.fontWeight = on ? "bold" : "normal";
         });
+        // the linear panes are hidden, not just covered, in Graph mode (their status bars sit above other content)
+        ["recipe", "IO"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.visibility = m === "graph" ? "hidden" : "";
+        });
+        toGraphBtn.style.display = m === "graph" ? "none" : "";
         if (m === "graph") {
             pane.style.display = "flex";
             layout();
+            editor.fit();
             window.history.replaceState({}, document.title, "#graph=" + graphToLink(editor.serialize()));
             editor.scheduleRun();
         } else {
@@ -106,6 +113,17 @@ whenAppReady(app => {
             updateURL(true, null, true);
         }
     }
+    // a Graph button in the recipe pane's title bar too, so the switch is never out of reach
+    const toGraphBtn = document.createElement("button");
+    toGraphBtn.type = "button";
+    toGraphBtn.id = "to-graph-mode";
+    toGraphBtn.textContent = "Graph \u2192";
+    toGraphBtn.title = "Switch to the graph (DAG) editor - it keeps its own state";
+    toGraphBtn.style.cssText = "float:right; margin:4px 8px 0 0; padding:1px 8px; font-size:12px; cursor:pointer;";
+    toGraphBtn.addEventListener("click", () => setMode("graph"));
+    const recipeTitle = document.querySelector("#recipe .title");
+    if (recipeTitle) recipeTitle.appendChild(toGraphBtn);
+
     sw.addEventListener("click", e => {
         if (e.target.dataset.mode) setMode(e.target.dataset.mode);
     });

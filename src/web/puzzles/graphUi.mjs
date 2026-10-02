@@ -84,21 +84,24 @@ function dialog(html, wire) {
  * @param {Function} linkFor
  * @returns {HTMLElement}
  */
-export function createGraphToolbar(container, editor, linkFor) {
+export function createGraphToolbar(container, editor, linkFor, extra = {}) {
     ensureStyles();
     const bar = document.createElement("div");
     bar.className = "pz-bar";
-    bar.innerHTML = `
+    bar.innerHTML = (extra.toRecipe ? `<button data-a="recipe" title="Back to the linear recipe editor (its own state)" style="font-weight:bold;">&larr; Recipe</button>` : "") + `
         <button data-a="run" title="Bake the graph now (it also re-bakes after every edit)">Run</button>
         <button data-a="save" title="Save this graph by name in the browser, or export it as JSON">Save</button>
         <button data-a="load" title="Load a saved graph, or paste graph JSON or a graph link">Load</button>
         <button data-a="clear" title="Empty the canvas">Clear</button>
+        <button data-a="fit" title="Fit the whole graph in view">Fit</button>
         <button data-a="example" title="The Kryptos-CTF PK1-10 graph">PK example</button>
         <button data-a="link" title="Copy a link that holds the whole graph">Copy link</button>
-        <span class="pz-hint">Double-click the canvas (or an operation in the list) to add it; drag an output onto an input or a key port to wire it.</span>`;
+        <span class="pz-hint">Double-click the canvas or an operation to add it; drag an output onto an input or a key port; click an output to see it all.</span>`;
     container.appendChild(bar);
     const actions = {
         run: () => editor.run(),
+        fit: () => editor.fit(),
+        recipe: () => extra.toRecipe && extra.toRecipe(),
         clear: () => {
             if (window.confirm("Clear the graph?")) editor.clear();
         },

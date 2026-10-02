@@ -84,7 +84,7 @@ const outCheck = await page.evaluate(async () => {
     const atCollapsed = !!r1 && Math.abs(r1[1] - (node.pos[1] + 2)) < 1;
     const click = () => {
         const r = node._outputRect;
-        const off = cv.convertCanvasToOffset([r[0] + 20, r[1] + 5]);
+        const off = cv.convertOffsetToCanvas([r[0] + 20, r[1] + 5]); // graph -> screen in LiteGraph 0.7's naming
         const b = cv.canvas.getBoundingClientRect();
         const opts = {bubbles: true, clientX: b.left + off[0], clientY: b.top + off[1], pointerId: 1, button: 0};
         cv.canvas.dispatchEvent(new PointerEvent("pointerdown", opts));
@@ -115,7 +115,7 @@ await page.goto(base + "index.html", {waitUntil: "networkidle0"});
 await page.waitForFunction(() => window.puzzlesGraphMode, {timeout: 60000});
 const startMode = await page.evaluate(() => [window.puzzlesGraphMode.mode(), getComputedStyle(document.getElementById("graph-pane")).display]);
 modeOk += startMode[0] === "linear" && startMode[1] === "none";
-await clickSel('#editor-mode-switch [data-mode="graph"]');
+await clickSel('#to-graph-mode');
 await page.evaluate(() => window.puzzlesGraphMode.ready);
 let gp = {};
 for (let t = 0; t < 60; t++) {
@@ -126,8 +126,9 @@ for (let t = 0; t < 60; t++) {
     await new Promise(r => setTimeout(r, 250));
 }
 const inApp = [...Array(8).keys()].filter(k => gp["pk" + (k + 1)] === pts[k]).length;
-const shown = await page.evaluate(() => [getComputedStyle(document.getElementById("graph-pane")).display, window.location.hash.startsWith("#graph=")]);
-modeOk += inApp === 8 && shown[0] === "flex" && shown[1];
+const shown = await page.evaluate(() => [getComputedStyle(document.getElementById("graph-pane")).display, window.location.hash.startsWith("#graph="),
+    getComputedStyle(document.getElementById("recipe")).visibility, getComputedStyle(document.querySelector("#IO")).visibility]);
+modeOk += inApp === 8 && shown[0] === "flex" && shown[1] && shown[2] === "hidden" && shown[3] === "hidden";
 const n0 = await page.evaluate(() => window.puzzlesGraphMode.editor.graph._nodes.length);
 await page.evaluate(() => {
     const li = [...document.querySelectorAll("#categories li.operation")].find(l => l.textContent.trim() === "To Base64");
@@ -148,9 +149,9 @@ await clickSel('.pz-dialog [data-load]');
 const nLoad = await page.evaluate(() => window.puzzlesGraphMode.editor.graph._nodes.length);
 modeOk += nClear === 0 && nLoad === n1;
 const glinkApp = await page.evaluate(() => window.location.href);
-await clickSel('#editor-mode-switch [data-mode="linear"]');
-const backState = await page.evaluate(() => [getComputedStyle(document.getElementById("graph-pane")).display, window.location.hash.includes("graph=")]);
-modeOk += backState[0] === "none" && !backState[1];
+await clickSel('.pz-bar [data-a="recipe"]');
+const backState = await page.evaluate(() => [getComputedStyle(document.getElementById("graph-pane")).display, window.location.hash.includes("graph="), getComputedStyle(document.getElementById("recipe")).visibility]);
+modeOk += backState[0] === "none" && !backState[1] && backState[2] === "visible";
 await page.goto("about:blank");
 await page.goto(glinkApp, {waitUntil: "networkidle0"});
 await page.waitForFunction(() => window.puzzlesGraphMode, {timeout: 60000});
