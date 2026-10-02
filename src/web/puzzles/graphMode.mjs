@@ -35,7 +35,7 @@ whenAppReady(app => {
     // the pane: over the recipe and IO panes, from just right of the operations list (its gutter stays draggable)
     const pane = document.createElement("div");
     pane.id = "graph-pane";
-    pane.style.cssText = "position:absolute; top:0; bottom:0; right:0; display:none; flex-direction:column; background:#222; z-index:1000;";
+    pane.style.cssText = "position:absolute; top:0; bottom:0; right:0; display:none; flex-direction:column; background:#222; z-index:1000; overflow:hidden;";
     const barHost = document.createElement("div");
     const canvasEl = document.createElement("canvas");
     canvasEl.id = "graph-canvas";
@@ -56,16 +56,28 @@ whenAppReady(app => {
             if (mode === "graph") window.history.replaceState({}, document.title, "#graph=" + graphToLink(json));
         }
     });
-    createGraphToolbar(barHost, editor, linkFor, {toRecipe: () => setMode("linear")});
+    createGraphToolbar(barHost, editor, linkFor);
 
-    /** the pane follows the operations list's width and the window */
+    /* the pane follows the operations list's width; the canvas fills exactly what the pane has left under its toolbar,
+       measured from the laid-out pane whenever either changes size - a canvas taller than that space overflows the
+       page, and focusing it on a click scrolls the banner out of view */
+    const sizeCanvas = () => {
+        if (mode !== "graph") return;
+        const w = pane.clientWidth, h = pane.clientHeight - barHost.offsetHeight;
+        if (w > 0 && h > 0 && (canvasEl.width !== w || canvasEl.height !== h)) editor.resize(w, h);
+    };
     const layout = () => {
-        const left = ops.offsetWidth + 4;
-        pane.style.left = left + "px";
-        if (mode === "graph") editor.resize(wrapper.clientWidth - left, wrapper.clientHeight - barHost.offsetHeight);
+        pane.style.left = (ops.offsetWidth + 4) + "px";
+        sizeCanvas();
     };
     new ResizeObserver(layout).observe(ops);
+    new ResizeObserver(sizeCanvas).observe(pane);
+    new ResizeObserver(sizeCanvas).observe(barHost);
     window.addEventListener("resize", layout);
+    // and whatever else moves the page, the banner stays put in Graph mode
+    document.addEventListener("scroll", () => {
+        if (mode === "graph" && document.scrollingElement.scrollTop !== 0) document.scrollingElement.scrollTop = 0;
+    }, true);
 
     // the linear recipe's URL updates pause in Graph mode, so the address bar holds the graph there
     const updateURL = app.updateURL.bind(app);
@@ -101,11 +113,13 @@ whenAppReady(app => {
             const el = document.getElementById(id);
             if (el) el.style.visibility = m === "graph" ? "hidden" : "";
         });
-        toGraphBtn.style.display = m === "graph" ? "none" : "";
         if (m === "graph") {
             pane.style.display = "flex";
             layout();
-            editor.fit();
+            requestAnimationFrame(() => {
+                sizeCanvas();
+                editor.fit();
+            });
             window.history.replaceState({}, document.title, "#graph=" + graphToLink(editor.serialize()));
             editor.scheduleRun();
         } else {
@@ -113,17 +127,6 @@ whenAppReady(app => {
             updateURL(true, null, true);
         }
     }
-    // a Graph button in the recipe pane's title bar too, so the switch is never out of reach
-    const toGraphBtn = document.createElement("button");
-    toGraphBtn.type = "button";
-    toGraphBtn.id = "to-graph-mode";
-    toGraphBtn.textContent = "Graph \u2192";
-    toGraphBtn.title = "Switch to the graph (DAG) editor - it keeps its own state";
-    toGraphBtn.style.cssText = "float:right; margin:4px 8px 0 0; padding:1px 8px; font-size:12px; cursor:pointer;";
-    toGraphBtn.addEventListener("click", () => setMode("graph"));
-    const recipeTitle = document.querySelector("#recipe .title");
-    if (recipeTitle) recipeTitle.appendChild(toGraphBtn);
-
     sw.addEventListener("click", e => {
         if (e.target.dataset.mode) setMode(e.target.dataset.mode);
     });

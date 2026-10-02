@@ -115,7 +115,7 @@ await page.goto(base + "index.html", {waitUntil: "networkidle0"});
 await page.waitForFunction(() => window.puzzlesGraphMode, {timeout: 60000});
 const startMode = await page.evaluate(() => [window.puzzlesGraphMode.mode(), getComputedStyle(document.getElementById("graph-pane")).display]);
 modeOk += startMode[0] === "linear" && startMode[1] === "none";
-await clickSel('#to-graph-mode');
+await clickSel('#editor-mode-switch [data-mode="graph"]');
 await page.evaluate(() => window.puzzlesGraphMode.ready);
 let gp = {};
 for (let t = 0; t < 60; t++) {
@@ -129,6 +129,16 @@ const inApp = [...Array(8).keys()].filter(k => gp["pk" + (k + 1)] === pts[k]).le
 const shown = await page.evaluate(() => [getComputedStyle(document.getElementById("graph-pane")).display, window.location.hash.startsWith("#graph="),
     getComputedStyle(document.getElementById("recipe")).visibility, getComputedStyle(document.querySelector("#IO")).visibility]);
 modeOk += inApp === 8 && shown[0] === "flex" && shown[1] && shown[2] === "hidden" && shown[3] === "hidden";
+// clicking in the graph must not scroll the page: the banner (with the switch) stays at the top
+await new Promise(r => setTimeout(r, 300));
+await page.mouse.click(900, 500);
+await page.mouse.click(1200, 300);
+await new Promise(r => setTimeout(r, 300));
+const bannerTop = await page.evaluate(() => [document.getElementById("banner").getBoundingClientRect().top, document.scrollingElement.scrollTop,
+    document.scrollingElement.scrollHeight <= document.scrollingElement.clientHeight]);
+const bannerOk = bannerTop[0] === 0 && bannerTop[1] === 0 && bannerTop[2];
+console.log("APPMODE banner after clicks in the graph", bannerOk ? "OK" : "FAILED", JSON.stringify(bannerTop));
+modeOk += bannerOk ? 0 : -100;
 const n0 = await page.evaluate(() => window.puzzlesGraphMode.editor.graph._nodes.length);
 await page.evaluate(() => {
     const li = [...document.querySelectorAll("#categories li.operation")].find(l => l.textContent.trim() === "To Base64");
@@ -149,7 +159,7 @@ await clickSel('.pz-dialog [data-load]');
 const nLoad = await page.evaluate(() => window.puzzlesGraphMode.editor.graph._nodes.length);
 modeOk += nClear === 0 && nLoad === n1;
 const glinkApp = await page.evaluate(() => window.location.href);
-await clickSel('.pz-bar [data-a="recipe"]');
+await clickSel('#editor-mode-switch [data-mode="linear"]');
 const backState = await page.evaluate(() => [getComputedStyle(document.getElementById("graph-pane")).display, window.location.hash.includes("graph="), getComputedStyle(document.getElementById("recipe")).visibility]);
 modeOk += backState[0] === "none" && !backState[1] && backState[2] === "visible";
 await page.goto("about:blank");

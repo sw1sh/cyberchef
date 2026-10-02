@@ -88,7 +88,7 @@ export function createGraphToolbar(container, editor, linkFor, extra = {}) {
     ensureStyles();
     const bar = document.createElement("div");
     bar.className = "pz-bar";
-    bar.innerHTML = (extra.toRecipe ? `<button data-a="recipe" title="Back to the linear recipe editor (its own state)" style="font-weight:bold;">&larr; Recipe</button>` : "") + `
+    bar.innerHTML = `
         <button data-a="run" title="Bake the graph now (it also re-bakes after every edit)">Run</button>
         <button data-a="save" title="Save this graph by name in the browser, or export it as JSON">Save</button>
         <button data-a="load" title="Load a saved graph, or paste graph JSON or a graph link">Load</button>
@@ -101,7 +101,6 @@ export function createGraphToolbar(container, editor, linkFor, extra = {}) {
     const actions = {
         run: () => editor.run(),
         fit: () => editor.fit(),
-        recipe: () => extra.toRecipe && extra.toRecipe(),
         clear: () => {
             if (window.confirm("Clear the graph?")) editor.clear();
         },
