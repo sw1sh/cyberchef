@@ -1,0 +1,86 @@
+/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+/*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
+
+/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
+
+/**
+ * @author n1474335 [n1474335@gmail.com]
+ * @copyright Crown Copyright 2016
+ * @license Apache-2.0
+ */
+
+/**
+ * A small client for CyberChef's own ChefWorker, so the graph editor and the recipe book bake with exactly the engine
+ * the main app uses (operation modules loaded on demand from ./modules/).
+ *
+ * @license Apache-2.0
+ */
+
+/**
+ * Base64 functions.
+ *
+ * @author n1474335 [n1474335@gmail.com]
+ * @copyright Crown Copyright 2016
+ * @license Apache-2.0
+ */
+
+/**
+ * Custom error type for handling operation input errors.
+ * i.e. where the operation can handle the error and print a message to the screen.
+ *
+ * @author d98762625 [d98762625@gmail.com]
+ * @copyright Crown Copyright 2018
+ * @license Apache-2.0
+ */
+
+/**
+ * CyberChef - The Cyber Swiss Army Knife
+ *
+ * @copyright Crown Copyright 2016-2026
+ * @license Apache-2.0
+ *
+ *   Copyright 2016-2026 Crown Copyright
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Decimal functions.
+ *
+ * @author n1474335 [n1474335@gmail.com]
+ * @copyright Crown Copyright 2018
+ * @license Apache-2.0
+ */
+
+/**
+ * The Paradigm Kryptos-CTF panels PK1-8: ciphertexts and decryption recipes, every key a word.
+ * Generated from puzzles-check/recipes.mjs.
+ *
+ * @license Apache-2.0
+ */
+
+/**
+ * The recipe GRAPH: CyberChef operations as nodes on a canvas (LiteGraph, the node editor ComfyUI grew from), wired
+ * output to input.  Every operation has a text input and a text output, a widget for each argument, and - for every
+ * string argument - an input port that, when wired, takes the argument from another node's output: so one panel's
+ * plaintext can be the next one's key.  Run bakes the graph in dependency order, one operation at a time, on
+ * CyberChef's own worker; the address bar holds the whole graph (#graph=, lz-string compressed).
+ *
+ * @license Apache-2.0
+ */
