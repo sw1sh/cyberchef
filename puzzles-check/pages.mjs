@@ -49,6 +49,13 @@ const extra = await page.evaluate(() => {
 console.log("GRAPH alphabet node feeds", extra.fed, "fields | text nodes", extra.texts.join(", "), "| view nodes", extra.views);
 const glink = await page.evaluate(() => window.location.hash.length);
 console.log("GRAPH link fragment length", glink);
+const collapsed = await page.evaluate(() => {
+    const ns = window.puzzlesGraph.graph._nodes;
+    return [ns.filter(n => n.opName).every(n => n.flags.collapsed), ns.filter(n => n.type === "Puzzles/Text").some(n => n.flags.collapsed)];
+});
+const collapsedOk = collapsed[0] && !collapsed[1];
+console.log("GRAPH cipher nodes collapsed by default", collapsedOk ? "OK" : "FAILED", JSON.stringify(collapsed));
+ok += collapsedOk ? 0 : -100;
 // live: change the alphabet node the way the UI does (value, then the widget's callback), with no Run - PK1 must
 // change; restore it - PK1 must come back exact
 const setAlphabet = v => page.evaluate(v => {
@@ -73,12 +80,21 @@ for (let t = 0; t < 40; t++) {
 }
 const live = changed !== pts[0] && back === pts[0];
 console.log("GRAPH live edit", live ? "OK" : "FAILED", "| A-Z alphabet gives", changed.slice(0, 20), "| KRYPTOS again exact", back === pts[0]);
+// clicking in the standalone graph must not scroll its toolbar away either
+await page.mouse.click(700, 500);
+await page.mouse.click(900, 700);
+await new Promise(r => setTimeout(r, 300));
+const sbar = await page.evaluate(() => [document.querySelector(".pz-bar").getBoundingClientRect().top >= 0, document.body.scrollTop, document.scrollingElement.scrollTop]);
+const sbarOk = sbar[0] && sbar[1] === 0 && sbar[2] === 0;
+console.log("GRAPH toolbar after clicks", sbarOk ? "OK" : "FAILED", JSON.stringify(sbar));
+ok += sbarOk ? 0 : -100;
+
 // outputs: a collapsed node still shows its output under its title; clicking the output shows it in full (wrapped,
 // no ellipsis), clicking again folds it back to one line
 const outCheck = await page.evaluate(async () => {
     const g = window.puzzlesGraph.graph, cv = window.puzzlesGraph.canvas;
     const node = g._nodes.find(n => n.properties && n.properties.panel === "pk1");
-    node.collapse(true);
+    node.flags.collapsed = true; // collapse(true) toggles in LiteGraph 0.7
     cv.draw(true, true);
     const r1 = node._outputRect && node._outputRect.slice();
     const atCollapsed = !!r1 && Math.abs(r1[1] - (node.pos[1] + 2)) < 1;
@@ -97,7 +113,7 @@ const outCheck = await page.evaluate(async () => {
     click();
     const r3 = node._outputRect.slice();
     const fullOff = !node.properties.showOutput && r3[3] < 2 * 15;
-    node.collapse(true);
+    node.flags.collapsed = true; // collapse(true) toggles in LiteGraph 0.7
     cv.draw(true, true);
     return {atCollapsed, fullOn, fullOff, heights: [r1 && r1[3], r2[3], r3[3]]};
 });
@@ -135,8 +151,9 @@ await page.mouse.click(900, 500);
 await page.mouse.click(1200, 300);
 await new Promise(r => setTimeout(r, 300));
 const bannerTop = await page.evaluate(() => [document.getElementById("banner").getBoundingClientRect().top, document.scrollingElement.scrollTop,
-    document.scrollingElement.scrollHeight <= document.scrollingElement.clientHeight]);
-const bannerOk = bannerTop[0] === 0 && bannerTop[1] === 0 && bannerTop[2];
+    document.scrollingElement.scrollHeight <= document.scrollingElement.clientHeight,
+    document.getElementById("graph-pane").scrollTop, document.querySelector("#graph-pane .pz-bar").getBoundingClientRect().top]);
+const bannerOk = bannerTop[0] === 0 && bannerTop[1] === 0 && bannerTop[2] && bannerTop[3] === 0 && bannerTop[4] === 30;
 console.log("APPMODE banner after clicks in the graph", bannerOk ? "OK" : "FAILED", JSON.stringify(bannerTop));
 modeOk += bannerOk ? 0 : -100;
 const n0 = await page.evaluate(() => window.puzzlesGraphMode.editor.graph._nodes.length);

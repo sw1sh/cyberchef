@@ -336,6 +336,10 @@ export function createGraphEditor(canvasEl, opts = {}) {
             }
             ends[key] = prev;
         });
+        // the cipher (operation) nodes start collapsed: each still shows its output under it
+        graph._nodes.forEach(n => {
+            if (n.opName) n.flags.collapsed = true;
+        });
         loading = false;
         return ends;
     }
@@ -402,11 +406,9 @@ export function createGraphEditor(canvasEl, opts = {}) {
         fit: fit,
         addOperation: addOperation,
         serialize: () => graph.serialize(),
-        resize: (w, h) => {
-            canvas.canvas.width = w;
-            canvas.canvas.height = h;
-            canvas.resize();
-        },
+        // LiteGraph's resize() without a size takes its parent element's - the whole pane, toolbar included - so the
+        // size is always passed
+        resize: (w, h) => canvas.resize(w, h),
         panels: () => Object.fromEntries(graph._nodes.filter(n => n.properties && n.properties.panel).map(n => [n.properties.panel, n.preview || ""]))
     };
 }
