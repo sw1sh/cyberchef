@@ -1,5 +1,5 @@
 /**
- * The Paradigm Kryptos-CTF panels PK1-10: ciphertexts, and decryption recipes for PK1-9, every key a word.
+ * The Paradigm Kryptos-CTF panels PK1-10: ciphertexts, and decryption recipes for all ten, every key a word.
  * Generated from puzzles-check/recipes.mjs.
  *
  * @license Apache-2.0
@@ -264,6 +264,221 @@ export const PK_BOOK = [
                     "KRYPTOS",
                     "KRYPTOS",
                     "CLEPSYDRA",
+                    "Vigenere"
+                ]
+            }
+        ]
+    },
+    {
+        "title": "PK10 - every recipe of PK1-PK9 stacked with its own keys, the spiral 42 x 12 (method by Ron S)",
+        "input": "UBINFYJSFQXQVRLJJAJDGBXIWKDMAREZTGSHQWRXCHEPCLYSDNGYRRBTCVOZJYVLYWREJTCDOYVEYCJJVZKRMKTRPGVHRWMJSRCSHXZMJEVQKJYJJAYZKDFQBGRSWXATJMEXKFXAXKSIZXOERFESNVCGCNRHEOBCNCBUPXTJJRCIMDMRUVZWRDRRFXAPGPIGSPLILFIZSTDZYOVQGGDFUFZPUOJPJVWREUVRQIYPCEHGYUZUKWTFXELUNOKBANZFTFRMXZSXXQSBGPCWGXPFSCANSVUYLMTZIRCCCJJPBQAEPWVCDIMLOPOXQEGJKVQIVHEFAPQMVCYSQAFKCTYTPAOOJZCWIPGDPAFTINBFFHVXYEQXCEIDJJOUABBAHSWKHGMLJBXDSQEFBBDLTLJPLZPIPPTRGDRZIZPUPYJODOCSOYCZZWTKYWMBQTFMFEQZWVPQYLJTMEYKYBNOPEPUMHCFJSLFWOISWLKFFABTYFQDTEQBDELIEOZQ",
+        "recipe": [
+            {
+                "op": "Keyword Columnar",
+                "args": [
+                    "Decrypt",
+                    "BEAMWORK",
+                    "TopToBottom"
+                ]
+            },
+            {
+                "op": "Grid Route",
+                "args": [
+                    "Decrypt",
+                    42,
+                    12,
+                    "Rotate270",
+                    "SpiralIn"
+                ]
+            },
+            {
+                "op": "Quagmire",
+                "args": [
+                    "Decrypt",
+                    "KRYPTOS",
+                    "KRYPTOS",
+                    "CLEPSYDRA",
+                    "Vigenere"
+                ]
+            },
+            {
+                "op": "Quagmire",
+                "args": [
+                    "Decrypt",
+                    "KRYPTOS",
+                    "KRYPTOS",
+                    "METE METER METIER MASTERY",
+                    "Vigenere"
+                ]
+            },
+            {
+                "op": "Hill Keyword",
+                "args": [
+                    "Decrypt",
+                    "ALCHEMIST",
+                    "KRYPTOS"
+                ]
+            },
+            {
+                "op": "Quagmire",
+                "args": [
+                    "Decrypt",
+                    "KRYPTOS",
+                    "KRYPTOS",
+                    "ANNEAL",
+                    "Vigenere"
+                ]
+            },
+            {
+                "op": "Quagmire",
+                "args": [
+                    "Decrypt",
+                    "KRYPTOS",
+                    "KRYPTOS",
+                    "PORTAL",
+                    "Vigenere"
+                ]
+            },
+            {
+                "op": "Keyword Columnar",
+                "args": [
+                    "Decrypt",
+                    "SMITHWORK",
+                    "TopToBottom"
+                ]
+            },
+            {
+                "op": "Keyword Columnar",
+                "args": [
+                    "Decrypt",
+                    "HANDIWORK",
+                    "TopToBottom"
+                ]
+            },
+            {
+                "op": "Register",
+                "args": [
+                    "([\\s\\S]*)",
+                    true,
+                    false,
+                    false
+                ]
+            },
+            {
+                "op": "Find / Replace",
+                "args": [
+                    {
+                        "option": "Regex",
+                        "string": "^[\\s\\S]*$"
+                    },
+                    "YOVISYUAFKUQNRJQLZTAZTMQOUKELJKCYUWIDSPSWRJRUEZNIFPUMUHQFFVBGOBEPWNTZGKVUTOVFSADUJUAYGWKQYOGNKHZVQMEWHSJGJFOBPHXKAPEXPWRJTSPSIJLCSXYTLDFBNZNPUAZNBZPKRFCUZDDZHZULZVPVWCXSIUVSCCFATGSJPNIGCJVTMUPTCGRTOFRXWCYKOMXOJKCECRUCKBDCIYJ",
+                    true,
+                    false,
+                    true,
+                    false
+                ]
+            },
+            {
+                "op": "Quagmire",
+                "args": [
+                    "Decrypt",
+                    "KRYPTOS",
+                    "KRYPTOS",
+                    "OCHRE VERDIGRIS",
+                    "Vigenere"
+                ]
+            },
+            {
+                "op": "Keyword Columnar",
+                "args": [
+                    "Decrypt",
+                    "UNDERLAY",
+                    "TopToBottom"
+                ]
+            },
+            {
+                "op": "Register",
+                "args": [
+                    "(([A-Z]{8})[\\s\\S]*)",
+                    true,
+                    false,
+                    false
+                ]
+            },
+            {
+                "op": "Find / Replace",
+                "args": [
+                    {
+                        "option": "Regex",
+                        "string": "^[\\s\\S]*$"
+                    },
+                    "$R0",
+                    true,
+                    false,
+                    true,
+                    false
+                ]
+            },
+            {
+                "op": "Running Key",
+                "args": [
+                    "Decrypt",
+                    "$R1",
+                    "KRYPTOS",
+                    "KRYPTOS"
+                ]
+            },
+            {
+                "op": "Keyword Columnar",
+                "args": [
+                    "Decrypt",
+                    "$R2",
+                    "TopToBottom"
+                ]
+            },
+            {
+                "op": "Quagmire",
+                "args": [
+                    "Decrypt",
+                    "KRYPTOS",
+                    "KRYPTOS",
+                    "OCHRE VERDIGRIS",
+                    "Vigenere"
+                ]
+            },
+            {
+                "op": "Keyword Columnar",
+                "args": [
+                    "Decrypt",
+                    "UNDERLAY",
+                    "TopToBottom"
+                ]
+            },
+            {
+                "op": "Quagmire",
+                "args": [
+                    "Decrypt",
+                    "KRYPTOS",
+                    "KRYPTOS",
+                    "PENTIMENTO ORDINATE",
+                    "Vigenere"
+                ]
+            },
+            {
+                "op": "Keyword Columnar",
+                "args": [
+                    "Decrypt",
+                    "HARDENS",
+                    "TopToBottom"
+                ]
+            },
+            {
+                "op": "Quagmire",
+                "args": [
+                    "Decrypt",
+                    "KRYPTOS",
+                    "KRYPTOS",
+                    "PROVENANCE",
                     "Vigenere"
                 ]
             }

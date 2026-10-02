@@ -286,10 +286,10 @@ export function createGraphEditor(canvasEl, opts = {}) {
     const ALPHABET_PORTS = ["Plain alphabet keyword", "Cipher alphabet keyword", "Alphabet keyword"];
 
     /**
-     * The PK1-10 example: one KRYPTOS node feeds every alphabet field; each solved panel is a chain from its ciphertext,
-     * PK5's keys wired from PK4's output (the running key, and through Take bytes its first 8 letters as the columnar key);
-     * PK9 and PK10 are their ciphertexts alone, ready for a recipe.  Each chain's last node is marked with its panel and
-     * shows its output under it.
+     * The PK1-10 example: one KRYPTOS node feeds every alphabet field; each panel is a chain from its ciphertext.  Where a
+     * linear recipe swaps PK4 in through Register (PK5, and PK5's step inside PK10), the graph wires PK4's output instead:
+     * the running key, and through Take bytes its first 8 letters as the columnar key.  Each chain's last node is marked
+     * with its panel and shows its output under it.
      */
     function pkExample() {
         loading = true;
@@ -307,29 +307,34 @@ export function createGraphEditor(canvasEl, opts = {}) {
             const y = 140 + i * 190;
             const src = add("Puzzles/Text", 20, y, {text: PK_CIPHERTEXTS[key]});
             src.title = key.toUpperCase() + " ciphertext";
-            const entry = PK_BOOK[i];
+            const entry = PK_BOOK.find(e => e.input === PK_CIPHERTEXTS[key]);
             let prev = src, x = 360;
-            const steps = !entry || key === "pk5" ? [] : entry.recipe;
+            const steps = entry ? entry.recipe : [];
+            let swapping = false;
             steps.forEach(op => {
-                const n = addOp(op, x, y);
+                // the Register swap that brings PK4's plaintext into a linear recipe is a wire here
+                if (op.op === "Register" && !swapping) {
+                    swapping = true;
+                    return;
+                }
+                if (swapping) {
+                    if (op.op === "Find / Replace" && op.args[1] === "$R0") swapping = false;
+                    return;
+                }
+                const n = addOp(op.args.includes("$R1") || op.args.includes("$R2") ?
+                    {op: op.op, args: op.args.map(v => (v === "$R1" || v === "$R2" ? "" : v))} : op, x, y);
                 wireAlphabet(n);
                 prev.connect(0, n, 0);
+                if (op.args.includes("$R1")) pk4out.connect(0, n, n.inputs.findIndex(sl => sl.name === "Key text"));
+                if (op.args.includes("$R2")) {
+                    const take = addOp({op: "Take bytes", args: [0, 8, false]}, x, y + 110);
+                    pk4out.connect(0, take, 0);
+                    take.connect(0, n, n.inputs.findIndex(sl => sl.name === "Key word"));
+                }
                 prev = n;
                 x += 300;
             });
             if (key === "pk4") pk4out = prev;
-            if (key === "pk5") {
-                const rk = addOp({op: "Running Key", args: ["Decrypt", "", "KRYPTOS", "KRYPTOS"]}, x, y);
-                wireAlphabet(rk);
-                prev.connect(0, rk, 0);
-                pk4out.connect(0, rk, rk.inputs.findIndex(s => s.name === "Key text"));
-                const take = addOp({op: "Take bytes", args: [0, 8, false]}, x, y + 110);
-                pk4out.connect(0, take, 0);
-                const col = addOp({op: "Keyword Columnar", args: ["Decrypt", "", "TopToBottom"]}, x + 300, y);
-                rk.connect(0, col, 0);
-                take.connect(0, col, col.inputs.findIndex(s => s.name === "Key word"));
-                prev = col;
-            }
             if (prev !== src) {
                 prev.properties = Object.assign(prev.properties || {}, {panel: key});
                 prev.title = prev.title + " - " + key.toUpperCase();
