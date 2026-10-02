@@ -26,14 +26,21 @@ await page.goto("about:blank");
 await page.goto(base + "graph.html", {waitUntil: "networkidle0"});
 await page.waitForFunction(() => window.puzzlesGraph && window.puzzlesGraph.ready, {timeout: 60000});
 await page.evaluate(() => window.puzzlesGraph.ready.then(() => true));
-const views = await page.evaluate(() => window.puzzlesGraph.graph._nodes.filter(n => n.type === "Puzzles/View").map(n => [n.title, n.value || ""]));
-views.sort();
-views.forEach(([title, v], i) => {
-    const k = parseInt(title.slice(2), 10) - 1;
+const panels = await page.evaluate(() => window.puzzlesGraph.panels());
+for (let k = 0; k < 8; k++) {
+    const v = panels["pk" + (k + 1)] || "";
     ok += v === pts[k];
-    console.log("GRAPH", title, v === pts[k] ? "EXACT" : "DIFF", v.slice(0, 30));
+    console.log("GRAPH", "pk" + (k + 1), v === pts[k] ? "EXACT" : "DIFF", v.slice(0, 30));
+}
+const extra = await page.evaluate(() => {
+    const g = window.puzzlesGraph.graph;
+    const alpha = g._nodes.find(n => n.title === "Alphabet");
+    const fed = alpha ? alpha.outputs[0].links.length : 0;
+    const texts = g._nodes.filter(n => n.type === "Puzzles/Text").map(n => n.title);
+    return {fed, texts, views: g._nodes.filter(n => n.type === "Puzzles/View").length};
 });
+console.log("GRAPH alphabet node feeds", extra.fed, "fields | text nodes", extra.texts.join(", "), "| view nodes", extra.views);
 const glink = await page.evaluate(() => window.location.hash.length);
-console.log("GRAPH nodes", views.length, "link fragment length", glink);
+console.log("GRAPH link fragment length", glink);
 console.log("PAGES_SUMMARY", ok, "of 16");
 await browser.close();

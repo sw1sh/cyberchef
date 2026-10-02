@@ -209,19 +209,36 @@ function addOp(entry, x, y) {
     return n;
 }
 
-/** the PK1-8 example: each panel a chain, PK5's keys wired from PK4's output */
+/** the alphabet fields of an operation, by name, to wire from one alphabet node */
+const ALPHABET_PORTS = ["Plain alphabet keyword", "Cipher alphabet keyword", "Alphabet keyword"];
+
+/**
+ * The PK1-10 example: one KRYPTOS node feeds every alphabet field; each solved panel is a chain from its ciphertext,
+ * PK5's keys wired from PK4's output (the running key, and through Take bytes its first 8 letters as the columnar key);
+ * PK9 and PK10 are their ciphertexts alone, ready for a recipe.  Each chain's last node is marked with its panel and
+ * shows its output under it.
+ */
 function pkExample() {
     graph.clear();
-    const views = {};
+    const alphabet = add("Puzzles/Text", 20, 20, {text: "KRYPTOS"});
+    alphabet.title = "Alphabet";
+    const wireAlphabet = n => ALPHABET_PORTS.forEach(name => {
+        const slot = n.inputs.findIndex(s => s.name === name);
+        if (slot > 0) alphabet.connect(0, n, slot);
+    });
+    const ends = {};
     let pk4out;
-    PK_BOOK.forEach((e, i) => {
-        const key = "pk" + (i + 1), y = 40 + i * 190;
+    const panels = Object.keys(PK_CIPHERTEXTS);
+    panels.forEach((key, i) => {
+        const y = 140 + i * 190;
         const src = add("Puzzles/Text", 20, y, {text: PK_CIPHERTEXTS[key]});
         src.title = key.toUpperCase() + " ciphertext";
+        const entry = PK_BOOK[i];
         let prev = src, x = 360;
-        const steps = key === "pk5" ? [] : e.recipe;
+        const steps = !entry || key === "pk5" ? [] : entry.recipe;
         steps.forEach(op => {
             const n = addOp(op, x, y);
+            wireAlphabet(n);
             prev.connect(0, n, 0);
             prev = n;
             x += 300;
@@ -229,6 +246,7 @@ function pkExample() {
         if (key === "pk4") pk4out = prev;
         if (key === "pk5") {
             const rk = addOp({op: "Running Key", args: ["Decrypt", "", "KRYPTOS", "KRYPTOS"]}, x, y);
+            wireAlphabet(rk);
             prev.connect(0, rk, 0);
             pk4out.connect(0, rk, rk.inputs.findIndex(s => s.name === "Key text"));
             const take = addOp({op: "Take bytes", args: [0, 8, false]}, x, y + 110);
@@ -237,14 +255,14 @@ function pkExample() {
             rk.connect(0, col, 0);
             take.connect(0, col, col.inputs.findIndex(s => s.name === "Key word"));
             prev = col;
-            x += 600;
         }
-        const v = add("Puzzles/View", x, y);
-        v.title = key.toUpperCase() + " plaintext";
-        prev.connect(0, v, 0);
-        views[key] = v;
+        if (prev !== src) {
+            prev.properties = Object.assign(prev.properties || {}, {panel: key});
+            prev.title = prev.title + " - " + key.toUpperCase();
+        }
+        ends[key] = prev;
     });
-    return views;
+    return ends;
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -280,5 +298,6 @@ window.addEventListener("DOMContentLoaded", () => {
         saveGraph();
         navigator.clipboard.writeText(window.location.href);
     };
-    window.puzzlesGraph = {graph: graph, run: run, ready: run()};
+    window.puzzlesGraph = {graph: graph, run: run, ready: run(),
+        panels: () => Object.fromEntries(graph._nodes.filter(n => n.properties && n.properties.panel).map(n => [n.properties.panel, n.preview || ""]))};
 });
