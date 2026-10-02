@@ -156,6 +156,7 @@
     "lodash": "^4.18.1",
     "loglevel": "^1.9.2",
     "loglevel-message-prefix": "^3.0.0",
+    "litegraph.js": "^0.7.18",
     "lz-string": "^1.5.0",
     "lz4js": "^0.2.0",
     "markdown-it": "^14.3.2",

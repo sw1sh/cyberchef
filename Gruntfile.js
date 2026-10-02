@@ -70,7 +70,9 @@ module.exports = function (grunt) {
 
             grunt.config.set("webpack.web.entry",
                 Object.assign({
-                    main: "./src/web/index.js"
+                    main: "./src/web/index.js",
+                    graph: "./src/web/puzzles/graph.mjs",
+                    book: "./src/web/puzzles/book.mjs"
                 }, moduleEntryPoints));
         });
 
@@ -132,12 +134,14 @@ module.exports = function (grunt) {
                 mode: "production",
                 target: "web",
                 entry: Object.assign({
-                    main: "./src/web/index.js"
+                    main: "./src/web/index.js",
+                    graph: "./src/web/puzzles/graph.mjs",
+                    book: "./src/web/puzzles/book.mjs"
                 }, moduleEntryPoints),
                 output: {
                     path: __dirname + "/build/prod",
                     filename: chunkData => {
-                        return chunkData.chunk.name === "main" ? "assets/[name].js" : "[name].js";
+                        return ["main", "graph", "book"].includes(chunkData.chunk.name) ? "assets/[name].js" : "[name].js";
                     },
                     globalObject: "this"
                 },
@@ -163,6 +167,17 @@ module.exports = function (grunt) {
                             minifyJS: true,
                             minifyCSS: true
                         }
+                    }),
+                    // the WolframInstitute/Puzzles pages: the recipe graph and the recipe book
+                    new HtmlWebpackPlugin({
+                        filename: "graph.html",
+                        template: "./src/web/puzzles/graph.html",
+                        chunks: ["graph"]
+                    }),
+                    new HtmlWebpackPlugin({
+                        filename: "book.html",
+                        template: "./src/web/puzzles/book.html",
+                        chunks: ["book"]
                     }),
                     new BundleAnalyzerPlugin({
                         analyzerMode: "static",
