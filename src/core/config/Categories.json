@@ -89,6 +89,17 @@
         ]
     },
     {
+        "name": "Puzzles (paclet)",
+        "ops": [
+            "Quagmire",
+            "Keyword Columnar",
+            "Hill Keyword",
+            "Running Key",
+            "Register",
+            "Find / Replace"
+        ]
+    },
+    {
         "name": "Encryption / Encoding",
         "ops": [
             "AES Encrypt",
