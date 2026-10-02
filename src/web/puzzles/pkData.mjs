@@ -1,5 +1,5 @@
 /**
- * The Paradigm Kryptos-CTF panels PK1-10: ciphertexts, and decryption recipes for PK1-8, every key a word.
+ * The Paradigm Kryptos-CTF panels PK1-10: ciphertexts, and decryption recipes for PK1-9, every key a word.
  * Generated from puzzles-check/recipes.mjs.
  *
  * @license Apache-2.0
@@ -230,6 +230,40 @@ export const PK_BOOK = [
                     "KRYPTOS",
                     "KRYPTOS",
                     "METE METER METIER MASTERY",
+                    "Vigenere"
+                ]
+            }
+        ]
+    },
+    {
+        "title": "PK9 - Columnar BEAMWORK, 12 x 12 clockwise spiral, Quagmire CLEPSYDRA (method by Colin Patrick)",
+        "input": "KSYAWFEYYOISZGEUFBLYATAIBYFAQBQYYVDWJKLJXMYIEPIFVHPQNHZGSUHUUDXLEHRHUMALHEGLHXSJMUXGNUIVBXGUJHZRZGUSVHMLSCTSUQXHSUMQQIFUQGKHJGUQGLHDKEWSKAMHIJXD",
+        "recipe": [
+            {
+                "op": "Keyword Columnar",
+                "args": [
+                    "Decrypt",
+                    "BEAMWORK",
+                    "TopToBottom"
+                ]
+            },
+            {
+                "op": "Grid Route",
+                "args": [
+                    "Decrypt",
+                    12,
+                    12,
+                    "Rotate270",
+                    "SpiralIn"
+                ]
+            },
+            {
+                "op": "Quagmire",
+                "args": [
+                    "Decrypt",
+                    "KRYPTOS",
+                    "KRYPTOS",
+                    "CLEPSYDRA",
                     "Vigenere"
                 ]
             }

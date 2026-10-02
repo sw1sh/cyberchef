@@ -20,5 +20,11 @@ export const recipes = {
           {op: "Running Key", args: ["Decrypt", "$R1", "KRYPTOS", "KRYPTOS"]}, COL("$R2")],
     pk6: [Q("PORTAL"), COL("SMITHWORK"), COL("HANDIWORK")],
     pk7: [{op: "Hill Keyword", args: ["Decrypt", "ALCHEMIST", "KRYPTOS"]}, Q("ANNEAL")],
-    pk8: [Q("METE METER METIER MASTERY")]
+    pk8: [Q("METE METER METIER MASTERY")],
+    // PK9: the method posted by Colin Patrick - columnar BEAMWORK, a 12 x 12 clockwise spiral from the top-right corner
+    // (the grid turned a quarter counter-clockwise, read SpiralIn), Quagmire III CLEPSYDRA
+    pk9: [COL("BEAMWORK"), {op: "Grid Route", args: ["Decrypt", 12, 12, "Rotate270", "SpiralIn"]}, Q("CLEPSYDRA")]
 };
+// PK9's plaintext is not in PLAINTEXTS.md: this is the paclet one-liner's, confirmed by Kryptos's independent Perl
+// implementation and a re-encryption equal to the ciphertext byte for byte
+pts.push("ISPENTTHEPASTMONTHWITHTHENEEDLEANDKNOTANDATLASTPELLEGRINSFINALMESSAGEHASBEENREVEALEDTOMEIWILLNOWSEALITFORYOUUNDEREVERYCIPHERIUSEDINTHISTESTAMENT");

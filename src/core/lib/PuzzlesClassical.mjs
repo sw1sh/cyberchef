@@ -203,3 +203,68 @@ export function hill(text, key, dir, alphaSpec) {
     }
     return out;
 }
+
+/**
+ * TranspositionFamily["Route", n, {{rows, cols}, symmetry, pattern}]: the cell order a grid route reads - the text
+ * written row by row into rows x cols, the grid turned or flipped by symmetry, then read off by pattern.
+ * @returns {number[]} perm, perm[i] the 0-based source cell read at output i
+ */
+export function routePerm(rows, cols, symmetry, pattern) {
+    const A = [];
+    for (let r = 0; r < rows; r++) A.push(Array.from({length: cols}, (_, c) => r * cols + c));
+    const T = M => M[0].map((_, j) => M.map(row => row[j]));
+    const rev = M => [...M].reverse();
+    const revRows = M => M.map(row => [...row].reverse());
+    const sym = {
+        Rows: M => M, Columns: T, Rotate90: M => T(rev(M)), Rotate180: M => rev(revRows(M)),
+        Rotate270: M => rev(T(M)), FlipRows: revRows, FlipColumns: rev, AntiTranspose: M => rev(revRows(T(M)))
+    }[symmetry];
+    if (!sym) throw new Error("Unknown symmetry " + symmetry);
+    const B = sym(A), h = B.length, w = B[0].length;
+    const spiral = () => {
+        let M = B.map(r => [...r]);
+        const out = [];
+        while (M.length > 0 && M[0].length > 0) {
+            out.push(...M[0]);
+            M = M.slice(1);
+            if (M.length === 0 || M[0].length === 0) break;
+            M = rev(T(M));
+        }
+        return out;
+    };
+    const diag = up => {
+        const out = [];
+        for (let d = 0; d <= h + w - 2; d++) {
+            const lo = Math.max(0, d - w + 1), hi = Math.min(h - 1, d);
+            if (up) for (let i = hi; i >= lo; i--) out.push(B[i][d - i]);
+            else for (let i = lo; i <= hi; i++) out.push(B[i][d - i]);
+        }
+        return out;
+    };
+    switch (pattern) {
+        case "Rows": return B.flat();
+        case "Boustrophedon": return B.flatMap((row, i) => (i % 2 === 0 ? row : [...row].reverse()));
+        case "Columns": return T(B).flat();
+        case "ColumnBoustrophedon": return T(B).flatMap((col, j) => (j % 2 === 0 ? col : [...col].reverse()));
+        case "SpiralIn": return spiral();
+        case "SpiralOut": return spiral().reverse();
+        case "Diagonals": return diag(false);
+        case "AntiDiagonals": return diag(true);
+        default: throw new Error("Unknown pattern " + pattern);
+    }
+}
+
+/**
+ * A grid route applied to every character: Encrypt reads output i from cell perm[i], Decrypt inverts it.
+ */
+export function gridRoute(text, rows, cols, symmetry, pattern, dir) {
+    const chars = [...text];
+    if (chars.length !== rows * cols) throw new Error("The text has " + chars.length + " characters; the grid holds " + rows * cols + ".");
+    const perm = routePerm(rows, cols, symmetry, pattern);
+    if (dir === "Encrypt") return perm.map(p => chars[p]).join("");
+    const out = new Array(chars.length);
+    perm.forEach((p, i) => {
+        out[p] = chars[i];
+    });
+    return out.join("");
+}

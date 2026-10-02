@@ -15,8 +15,8 @@ const clickSel = sel => page.evaluate(sel => {
 page.on("pageerror", e => console.log("PAGEERROR", e.message.slice(0, 200)));
 let ok = 0;
 await page.goto(base + "book.html", {waitUntil: "networkidle0"});
-await page.waitForFunction(() => window.puzzlesBook && window.puzzlesBook.book.length === 8, {timeout: 60000});
-for (let i = 0; i < 8; i++) {
+await page.waitForFunction(() => window.puzzlesBook && window.puzzlesBook.book.length === 9, {timeout: 60000});
+for (let i = 0; i < 9; i++) {
     await page.evaluate(i => window.puzzlesBook.show(i), i);
     let out = "";
     for (let t = 0; t < 60; t++) {
@@ -34,7 +34,7 @@ await page.goto(base + "graph.html", {waitUntil: "networkidle0"});
 await page.waitForFunction(() => window.puzzlesGraph && window.puzzlesGraph.ready, {timeout: 60000});
 await page.evaluate(() => window.puzzlesGraph.ready.then(() => true));
 const panels = await page.evaluate(() => window.puzzlesGraph.panels());
-for (let k = 0; k < 8; k++) {
+for (let k = 0; k < 9; k++) {
     const v = panels["pk" + (k + 1)] || "";
     ok += v === pts[k];
     console.log("GRAPH", "pk" + (k + 1), v === pts[k] ? "EXACT" : "DIFF", v.slice(0, 30));
@@ -137,14 +137,14 @@ let gp = {};
 for (let t = 0; t < 60; t++) {
     gp = await page.evaluate(() => window.puzzlesGraphMode.editor.panels());
     if (Object.keys(gp).length >= 8 && [...Array(8).keys()].every(k => gp["pk" + (k + 1)] === undefined || true)) {
-        if ([...Array(8).keys()].every(k => gp["pk" + (k + 1)])) break;
+        if ([...Array(9).keys()].every(k => gp["pk" + (k + 1)])) break;
     }
     await new Promise(r => setTimeout(r, 250));
 }
-const inApp = [...Array(8).keys()].filter(k => gp["pk" + (k + 1)] === pts[k]).length;
+const inApp = [...Array(9).keys()].filter(k => gp["pk" + (k + 1)] === pts[k]).length;
 const shown = await page.evaluate(() => [getComputedStyle(document.getElementById("graph-pane")).display, window.location.hash.startsWith("#graph="),
     getComputedStyle(document.getElementById("recipe")).visibility, getComputedStyle(document.querySelector("#IO")).visibility]);
-modeOk += inApp === 8 && shown[0] === "flex" && shown[1] && shown[2] === "hidden" && shown[3] === "hidden";
+modeOk += inApp === 9 && shown[0] === "flex" && shown[1] && shown[2] === "hidden" && shown[3] === "hidden";
 // clicking in the graph must not scroll the page: the banner (with the switch) stays at the top
 await new Promise(r => setTimeout(r, 300));
 await page.mouse.click(900, 500);
@@ -184,8 +184,8 @@ await page.goto(glinkApp, {waitUntil: "networkidle0"});
 await page.waitForFunction(() => window.puzzlesGraphMode, {timeout: 60000});
 const reopened = await page.evaluate(() => window.puzzlesGraphMode.mode());
 modeOk += reopened === "graph";
-console.log("APPMODE start", startMode.join("/"), "| graph panels exact", inApp, "of 8 | shown", shown.join("/"), "| dblclick adds node", n0, "->", n1, "recipe", recipeLen,
+console.log("APPMODE start", startMode.join("/"), "| graph panels exact", inApp, "of 9 | shown", shown.join("/"), "| dblclick adds node", n0, "->", n1, "recipe", recipeLen,
     "| save/clear/load", nClear, nLoad, "| back to recipe", backState.join("/"), "| link reopens", reopened);
 console.log("APPMODE_SUMMARY", modeOk, "of 6");
-console.log("PAGES_SUMMARY", ok + (live ? 1 : 0), "of 17");
+console.log("PAGES_SUMMARY", ok + (live ? 1 : 0), "of 19");
 await browser.close();
