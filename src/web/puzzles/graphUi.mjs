@@ -51,6 +51,9 @@ const CSS = `
 .pz-dialog li { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-bottom: 1px solid #3a3a3a; }
 .pz-dialog button { padding: 3px 10px; margin: 2px; background: #3a3a3a; color: #eee; border: 1px solid #555; border-radius: 4px; cursor: pointer; }
 .pz-dialog .pz-row { display: flex; gap: 6px; justify-content: flex-end; margin-top: 8px; }
+/* LiteGraph appends its menus, value prompts, search box and panels to <body> at z-index 10 or so; in the app's Graph
+   mode the canvas pane sits at 1000, so they would open behind it - raise them above it */
+.litecontextmenu, .graphdialog, .litegraph.dialog, .litesearchbox { z-index: 3000 !important; }
 `;
 
 /** inject the toolbar's styles once */
