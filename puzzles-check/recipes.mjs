@@ -23,7 +23,8 @@ export const recipes = {
     pk8: [Q("METE METER METIER MASTERY")],
     // PK9: the method posted by Colin Patrick - columnar BEAMWORK, a 12 x 12 clockwise spiral from the top-right corner
     // (the grid turned a quarter counter-clockwise, read SpiralIn), Quagmire III CLEPSYDRA
-    pk9: [COL("BEAMWORK"), {op: "Grid Route", args: ["Decrypt", 12, 12, "Rotate270", "SpiralIn"]}, Q("CLEPSYDRA")],
+    // (Rows 0: as many rows as the text needs - 12 here, 42 when PK10 reuses this step)
+    pk9: [COL("BEAMWORK"), {op: "Grid Route", args: ["Decrypt", 0, 12, "Rotate270", "SpiralIn"]}, Q("CLEPSYDRA")],
     // PK10: every recipe of PK1-PK9 stacked with its own keys, undone from PK9 back to PK1 (method posted by Ron S);
     // PK9's spiral grows to 42 x 12, and PK5's step takes PK4's plaintext through the same Register swap as PK5
     pk10: [COL("BEAMWORK"), {op: "Grid Route", args: ["Decrypt", 42, 12, "Rotate270", "SpiralIn"]}, Q("CLEPSYDRA"),

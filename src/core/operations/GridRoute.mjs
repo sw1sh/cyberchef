@@ -20,7 +20,7 @@ class GridRoute extends Operation {
 
         this.name = "Grid Route";
         this.module = "Ciphers";
-        this.description = "Route transposition on a grid: the text written row by row into Rows x Columns cells, the grid turned or flipped (Rows = as written, Columns = transposed, Rotate90/180/270 = clockwise turns, FlipRows, FlipColumns, AntiTranspose), then read off by a pattern: rows, boustrophedon, columns, column boustrophedon, a clockwise spiral inward (SpiralIn) or outward, or the diagonals. A clockwise spiral from the top-right corner down the right edge is Rotate270 + SpiralIn. Every character is a cell. Identical to the WolframInstitute/Puzzles paclet's TranspositionFamily[\"Route\", ...].";
+        this.description = "Route transposition on a grid: the text written row by row into Rows x Columns cells, the grid turned or flipped (Rows = as written, Columns = transposed, Rotate90/180/270 = clockwise turns, FlipRows, FlipColumns, AntiTranspose), then read off by a pattern: rows, boustrophedon, columns, column boustrophedon, a clockwise spiral inward (SpiralIn) or outward, or the diagonals. A clockwise spiral from the top-right corner down the right edge is Rotate270 + SpiralIn. Every character is a cell; Rows 0 takes as many rows as the text needs. Identical to the WolframInstitute/Puzzles paclet's TranspositionFamily[\"Route\", ...].";
         this.infoURL = "https://en.wikipedia.org/wiki/Transposition_cipher#Route_cipher";
         this.inputType = "string";
         this.outputType = "string";

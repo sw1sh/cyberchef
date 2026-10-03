@@ -251,7 +251,7 @@ export const PK_BOOK = [
                 "op": "Grid Route",
                 "args": [
                     "Decrypt",
-                    12,
+                    0,
                     12,
                     "Rotate270",
                     "SpiralIn"

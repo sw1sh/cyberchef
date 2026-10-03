@@ -81,6 +81,8 @@ function registerOp(name, cfg) {
             }
         });
         this.addOutput("output", "string");
+        // the operation itself, with its arguments as they stand (wired ones included), for a Composition to apply
+        this.addOutput("self", "op");
         this.serialize_widgets = true; // eslint-disable-line camelcase
         this.size = this.computeSize();
         this.size[0] = Math.max(this.size[0], 240);
@@ -102,6 +104,36 @@ function TextNode() {
 }
 TextNode.title = "Text";
 LiteGraph.registerNodeType("Puzzles/Text", TextNode);
+
+/**
+ * A composition: the operations wired into its steps (their "self" outputs, or another composition's), applied to its
+ * input in step order as one recipe - so a stack of panels' ciphers is wired from the nodes already on the canvas
+ * rather than copied.  Connecting the last step adds another; its own "self" is the whole sequence.
+ */
+function CompositionNode() {
+    this.addInput("input", "string");
+    this.addInput("step 1", "op");
+    this.addOutput("output", "string");
+    this.addOutput("self", "op");
+    this.size = [240, 60];
+    this.preview = "";
+}
+CompositionNode.title = "Composition";
+CompositionNode.desc = "Apply the operations wired into its steps, in order, as one recipe";
+CompositionNode.prototype.onConnectionsChange = function() {
+    const steps = this.inputs.filter(s => s.type === "op");
+    const last = steps[steps.length - 1];
+    if (last && last.link !== null && last.link !== undefined) this.addInput("step " + (steps.length + 1), "op");
+    // keep exactly one empty step at the end
+    for (let i = this.inputs.length - 1; i > 1; i--) {
+        const s = this.inputs[i], prev = this.inputs[i - 1];
+        if ((s.link === null || s.link === undefined) && prev.type === "op" && (prev.link === null || prev.link === undefined)) this.removeInput(i);
+        else break;
+    }
+    this.size = this.computeSize();
+    this.size[0] = Math.max(this.size[0], 240);
+};
+LiteGraph.registerNodeType("Puzzles/Composition", CompositionNode);
 
 /** a result: shows the text that reaches it, and checks it against "expected" when that is set */
 function ViewNode() {
@@ -201,12 +233,13 @@ export function createGraphEditor(canvasEl, opts = {}) {
     graph.onNodeAdded = () => scheduleRun();
     graph.onNodeRemoved = () => scheduleRun();
 
-    /** the text on a node's input slot, from the node wired into it */
+    /** the value on a node's input slot, from the output wired into it (a node's outputs are kept by slot) */
     function inputValue(node, slot, values) {
         const inp = node.inputs && node.inputs[slot];
         if (!inp || inp.link === null || inp.link === undefined) return undefined;
         const link = graph.links[inp.link];
-        return link ? values.get(link.origin_id) : undefined;
+        const outs = link ? values.get(link.origin_id) : undefined;
+        return outs ? outs[link.origin_slot] : undefined;
     }
 
     /** bake every node in dependency order; a node's output is the text its operation gives */
@@ -217,7 +250,24 @@ export function createGraphEditor(canvasEl, opts = {}) {
         for (const node of order) {
             node.error = false;
             if (node.type === "Puzzles/Text") {
-                values.set(node.id, node.widgets[0].value || "");
+                values.set(node.id, [node.widgets[0].value || ""]);
+            } else if (node.type === "Puzzles/Composition") {
+                const steps = [];
+                node.inputs.forEach((s, i) => {
+                    if (s.type !== "op") return;
+                    const v = inputValue(node, i, values);
+                    if (Array.isArray(v)) steps.push(...v);
+                });
+                try {
+                    const out = steps.length ? await chef.bake(inputValue(node, 0, values) || "", steps) : (inputValue(node, 0, values) || "");
+                    if (gen !== runGen) return values;
+                    values.set(node.id, [out, steps]);
+                    node.preview = out;
+                } catch (e) {
+                    node.error = true;
+                    node.preview = "Error: " + e.message;
+                    values.set(node.id, ["", steps]);
+                }
             } else if (node.type === "Puzzles/View") {
                 node.value = inputValue(node, 0, values);
                 node.preview = node.value || "";
@@ -232,15 +282,16 @@ export function createGraphEditor(canvasEl, opts = {}) {
                     if (a.type === "number") return Number(w.value);
                     return wired !== undefined ? wired : w.value;
                 });
+                const step = [{op: node.opName, args: args}];
                 try {
-                    const out = await chef.bake(inputValue(node, 0, values) || "", [{op: node.opName, args: args}]);
+                    const out = await chef.bake(inputValue(node, 0, values) || "", step);
                     if (gen !== runGen) return values;
-                    values.set(node.id, out);
+                    values.set(node.id, [out, step]);
                     node.preview = out;
                 } catch (e) {
                     node.error = true;
                     node.preview = "Error: " + e.message;
-                    values.set(node.id, "");
+                    values.set(node.id, ["", step]);
                 }
             }
             node.setDirtyCanvas(true, true);
@@ -288,8 +339,10 @@ export function createGraphEditor(canvasEl, opts = {}) {
     /**
      * The PK1-10 example: one KRYPTOS node feeds every alphabet field; each panel is a chain from its ciphertext.  Where a
      * linear recipe swaps PK4 in through Register (PK5, and PK5's step inside PK10), the graph wires PK4's output instead:
-     * the running key, and through Take bytes its first 8 letters as the columnar key.  Each chain's last node is marked
-     * with its panel and shows its output under it.
+     * the running key, and through Take bytes its first 8 letters as the columnar key.  PK10 is a Composition wired from
+     * the panels' own nodes - PK9's first, PK1's last, each panel's in its own order - since PK10 is every earlier cipher
+     * applied in turn (PK9's route at 0 rows grows to the text).  Each chain's last node is marked with its panel and
+     * shows its output under it.
      */
     function pkExample() {
         loading = true;
@@ -300,7 +353,7 @@ export function createGraphEditor(canvasEl, opts = {}) {
             const slot = n.inputs.findIndex(s => s.name === name);
             if (slot > 0) alphabet.connect(0, n, slot);
         });
-        const ends = {};
+        const ends = {}, chains = {};
         let pk4out;
         const panels = Object.keys(PK_CIPHERTEXTS);
         panels.forEach((key, i) => {
@@ -309,7 +362,8 @@ export function createGraphEditor(canvasEl, opts = {}) {
             src.title = key.toUpperCase() + " ciphertext";
             const entry = PK_BOOK.find(e => e.input === PK_CIPHERTEXTS[key]);
             let prev = src, x = 360;
-            const steps = entry ? entry.recipe : [];
+            const steps = entry && key !== "pk10" ? entry.recipe : [];
+            chains[key] = [];
             let swapping = false;
             steps.forEach(op => {
                 // the Register swap that brings PK4's plaintext into a linear recipe is a wire here
@@ -331,9 +385,19 @@ export function createGraphEditor(canvasEl, opts = {}) {
                     pk4out.connect(0, take, 0);
                     take.connect(0, n, n.inputs.findIndex(sl => sl.name === "Key word"));
                 }
+                chains[key].push(n);
                 prev = n;
                 x += 300;
             });
+            if (key === "pk10") {
+                const comp = add("Puzzles/Composition", x, y);
+                comp.title = "Composition: PK9 ... PK1";
+                prev.connect(0, comp, 0);
+                ["pk9", "pk8", "pk7", "pk6", "pk5", "pk4", "pk3", "pk2", "pk1"].forEach(k => (chains[k] || []).forEach(n => {
+                    n.connect(1, comp, comp.inputs.length - 1);
+                }));
+                prev = comp;
+            }
             if (key === "pk4") pk4out = prev;
             if (prev !== src) {
                 prev.properties = Object.assign(prev.properties || {}, {panel: key});

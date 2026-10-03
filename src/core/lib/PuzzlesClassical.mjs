@@ -259,6 +259,7 @@ export function routePerm(rows, cols, symmetry, pattern) {
  */
 export function gridRoute(text, rows, cols, symmetry, pattern, dir) {
     const chars = [...text];
+    if (rows <= 0 && cols > 0 && chars.length % cols === 0) rows = chars.length / cols;
     if (chars.length !== rows * cols) throw new Error("The text has " + chars.length + " characters; the grid holds " + rows * cols + ".");
     const perm = routePerm(rows, cols, symmetry, pattern);
     if (dir === "Encrypt") return perm.map(p => chars[p]).join("");
